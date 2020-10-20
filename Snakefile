@@ -45,28 +45,32 @@ rule SPCA_construction:
 		"TCGA_data_split.RDS"
 	output:
 		"TCGA_spca_train.Rda",
-		"TCGA_spca_train_sparse.Rda"
+		"TCGA_spca_train_loadings.Rda"
 	shell:
 		"Rscript TCGA_SPCA.R"
 
-rule SPCA_analysis: # step one of SPCA gene selection; identifies important and unimportant SPCs
+rule SPCA_analysis: 
 	input:
 		"TCGA_spca_train.Rda",
-        "TCGA_spca_train_sparse.Rda",
+        "TCGA_spca_train_loadings.Rda",
 		"TCGA-HNSC-data/gdac.broadinstitute.org_HNSC.mRNAseq_Preprocess.Level_3.2016012800.0.0/HNSC.uncv2.mRNAseq_RSEM_all.txt",
 		"TCGA_data_split.RDS"
 	output:
-		"important and unimportant SPCs"
+		"TCGA_spca_gene_list.Rda"
+	log:
+		"logs/SPCA_analysis.log"
 	shell:
-		"do stuff"
+		"Rscript TCGA_SPCA_imp_goea.R"
 
-rule SPCA_GOEA:
+
+rule DAE_preprocessing:
 	input:
-		"important and unimportant SPCs"
+		"TCGA-HNSC/gdac.broadinstitute.org_HNSC.mRNAseq_Preprocess.Level_3.2016012800.0.0/HNSC.uncv2.mRNAseq_RSEM_all.txt",
+		"TCGA_data_split.RDS"
 	output:
-		"pathways associated with important SPCs but not unimportant ones"
+		"tumor_train_predae.csv"
 	shell:
-		"run a script probably"
+		"Rscript DAE_preproc.R
 
 rule DAE_construction: # grid search of hyperparams finds good DAE weights
 	input:
